@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de Estudio - Derecho</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(to right, #2c3e50, #4a6580);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .menu-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .menu-content {
+            background-color: #3a506b;
+            color: white;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, padding 0.3s ease;
+        }
+
+        .menu-content.active {
+            max-height: 500px;
+            padding: 20px;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #5bc0be;
+            background-color: white;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .random-option {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .random-option input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .generate-btn {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 180px;
+            height: 180px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(38, 117, 252, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .generate-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(38, 117, 252, 0.7);
+        }
+
+        .generate-btn i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .question-display {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            border-left: 5px solid #2575fc;
+            font-size: 1.2rem;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .generate-btn {
+                width: 150px;
+                height: 150px;
+                font-size: 1.2rem;
+            }
+            
+            .generate-btn i {
+                font-size: 2.5rem;
+            }
+            
+            .question-display {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Asistente de Estudio</h1>
+            <p class="subtitle">Herramienta personal para estudiantes de derecho</p>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-cog"></i>
+            </button>
+        </header>
+        
+        <div class="menu-content" id="menuContent">
+            <div class="filter-group">
+                <label for="semester-select">Semestre:</label>
+                <select id="semester-select">
+                    <option value="">Seleccionar semestre</option>
+                    <option value="1">Semestre 1</option>
+                    <option value="2">Semestre 2</option>
+                    <option value="3">Semestre 3</option>
+                    <option value="4">Semestre 4</option>
+                    <option value="5">Semestre 5</option>
+                    <option value="6">Semestre 6</option>
+                    <option value="7">Semestre 7</option>
+                    <option value="8">Semestre 8</option>
+                    <option value="9">Semestre 9</option>
+                    <option value="10">Semestre 10</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="subject-select">Materia:</label>
+                <select id="subject-select">
+                    <option value="">Seleccionar materia</option>
+                    <option value="romano">Derecho Romano</option>
+                    <option value="constitucional">Derecho Constitucional</option>
+                    <option value="penal">Derecho Penal</option>
+                    <option value="civil">Derecho Civil</option>
+                    <option value="mercantil">Derecho Mercantil</option>
+                    <option value="laboral">Derecho Laboral</option>
+                    <option value="administrativo">Derecho Administrativo</option>
+                    <option value="internacional">Derecho Internacional</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="partial-select">Parcial:</label>
+                <select id="partial-select">
+                    <option value="">Seleccionar parcial</option>
+                    <option value="1">Parcial 1</option>
+                    <option value="2">Parcial 2</option>
+                    <option value="3">Parcial 3</option>
+                </select>
+            </div>
+            
+            <div class="random-option">
+                <input type="checkbox" id="random-mode">
+                <label for="random-mode">Modo aleatorio (ignorar filtros)</label>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <button class="generate-btn">
+                <i class="fas fa-question"></i>
+                Generar Pregunta
+            </button>
+            
+            <div class="question-display">
+                <p>Selecciona tus preferencias y haz clic en el botón para generar una pregunta</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Asistente de Estudio - Derecho © 2023</p>
+            <p>Herramienta personalizada para tu aprendizaje</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const menuContent = document.getElementById('menuContent');
+            
+            // Alternar menú al hacer clic en el botón de configuración
+            menuToggle.addEventListener('click', function() {
+                menuContent.classList.toggle('active');
+                
+                // Rotar el icono al abrir/cerrar
+                if (menuContent.classList.contains('active')) {
+                    menuToggle.innerHTML = '<i class="fas fa-times"></i>';
+                } else {
+                    menuToggle.innerHTML = '<i class="fas fa-cog"></i>';
+                }
+            });
+            
+            // Aquí iría la lógica para generar preguntas en el futuro
+            const generateBtn = document.querySelector('.generate-btn');
+            generateBtn.addEventListener('click', function() {
+                // Animación de clic
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1.05)';
+                }, 100);
+                
+                // En una versión futura, aquí se generaría la pregunta
+                // Por ahora solo un mensaje de ejemplo
+                document.querySelector('.question-display p').textContent = 
+                    "Función de generación de preguntas en desarrollo...";
+            });
+        });
+    </script>
+</body>
+</html>
