@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Asistente de Estudio - Verbos (Filtrable)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 550px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(to right, #2c3e50, #4a6580);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        /* Filtros (modos) */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 20px 0 20px;
+        }
+        .filter-btn {
+            flex: 1;
+            min-width: 80px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 12px;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .filter-btn i {
+            font-size: 0.9rem;
+        }
+        .filter-btn.active {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37,117,252,0.3);
+        }
+
+        /* Ventana del mecanismo */
+        .window {
+            background: #f8f9fa;
+            margin: 20px 20px 10px 20px;
+            border-radius: 16px;
+            padding: 6px;
+            border: 2px solid #e9ecef;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .viewport {
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+            position: relative;
+            background: #ffffff;
+            border-radius: 12px;
+        }
+
+        .verb-list {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            will-change: transform;
+        }
+
+        .verb-item {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            color: #2c3e50;
+            letter-spacing: 2px;
+            text-align: center;
+            padding: 0 10px;
+            word-break: break-word;
+        }
+
+        .center-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #2575fc;
+            transform: translateY(-50%);
+            box-shadow: 0 0 10px rgba(37, 117, 252, 0.3);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .viewport::before,
+        .viewport::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            pointer-events: none;
+            z-index: 8;
+        }
+        .viewport::before {
+            top: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent);
+        }
+        .viewport::after {
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
+        }
+
+        .controls {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .spin-btn, .list-btn {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(38, 117, 252, 0.4);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 260px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .list-btn {
+            background: linear-gradient(to right, #2c3e50, #4a6580);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .spin-btn:active, .list-btn:active {
+            transform: scale(0.95);
+        }
+
+        .spin-btn:disabled, .list-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-area {
+            margin: 10px 20px 20px 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 12px;
+            border-left: 5px solid #6a11cb;
+            text-align: center;
+        }
+
+        #resultWord {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2c3e50;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+        }
+
+        .back-btn {
+            background: none;
+            border: 2px solid #2c3e50;
+            color: #2c3e50;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin: 0 20px 20px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            display: inline-block;
+            text-align: center;
+        }
+        .back-btn:hover {
+            background: #2c3e50;
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #6c757d;
+            font-size: 0.8rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* Modal responsivo */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 30px auto;
+            padding: 20px;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 1100px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #6a11cb;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .modal-header h2 {
+            color: #2c3e50;
+            font-size: 1.4rem;
+        }
+        .close-modal {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: 0.2s;
+        }
+        .close-modal:hover {
+            color: #e74c3c;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 65vh;
+        }
+        .verb-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Segoe UI', monospace;
+            font-size: 0.9rem;
+        }
+        .verb-table th, .verb-table td {
+            border: 1px solid #ddd;
+            padding: 10px 8px;
+            text-align: left;
+        }
+        .verb-table th {
+            background: linear-gradient(to right, #2c3e50, #4a6580);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        .verb-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        @media (max-width: 650px) {
+            .verb-table th, .verb-table td {
+                padding: 6px 5px;
+                font-size: 0.75rem;
+            }
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+            .verb-item {
+                font-size: 1.4rem;
+            }
+            .filter-btn {
+                font-size: 0.7rem;
+                padding: 6px 8px;
+            }
+        }
+        @media (max-width: 480px) {
+            .viewport {
+                height: 120px;
+            }
+            .verb-item {
+                height: 120px;
+                font-size: 1.2rem;
+            }
+            #resultWord {
+                font-size: 1.4rem;
+            }
+            .filter-btn span {
+                display: none;
+            }
+            .filter-btn i {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Práctica de Verbos</h1>
+        <p style="font-size: 0.9rem; opacity: 0.8;">Entrenamiento de Inglés Técnico</p>
+    </header>
+
+    <!-- Panel de filtros -->
+    <div class="filters">
+        <button class="filter-btn active" data-mode="base"><i class="fas fa-font"></i> <span>Base</span></button>
+        <button class="filter-btn" data-mode="past"><i class="fas fa-clock"></i> <span>Simple Past</span></button>
+        <button class="filter-btn" data-mode="participle"><i class="fas fa-check-double"></i> <span>Participle</span></button>
+        <button class="filter-btn" data-mode="spanish"><i class="fas fa-language"></i> <span>Español</span></button>
+    </div>
+
+    <div class="window">
+        <div class="viewport" id="viewport">
+            <div class="verb-list" id="verbList"></div>
+            <div class="center-line"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="spin-btn" id="spinBtn">
+            <i class="fas fa-sync-alt"></i> GIRAR
+        </button>
+        <button class="list-btn" id="listBtn">
+            <i class="fas fa-table-list"></i> LISTA COMPLETA
+        </button>
+    </div>
+
+    <div class="result-area">
+        <div id="resultWord">—</div>
+        <div style="font-size: 0.7rem; color: #7f8c8d; margin-top: 5px; font-weight: bold; text-transform: uppercase;">
+            Selección Actual
+        </div>
+    </div>
+
+    <div style="text-align: center;">
+        <button class="back-btn" onclick="window.location.href='index.html'">
+            <i class="fas fa-arrow-left"></i> Volver al Asistente
+        </button>
+    </div>
+
+    <footer>
+        <p>Asistente de Estudio - Derecho © 2025</p>
+    </footer>
+</div>
+
+<!-- Modal para tabla completa -->
+<div id="verbModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-book-open"></i> Lista completa de verbos</h2>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="table-wrapper">
+            <table class="verb-table" id="verbTable">
+                <thead>
+                    <tr><th>Base Form</th><th>Simple Past</th><th>Past Participle</th><th>Español</th></tr>
+                </thead>
+                <tbody id="verbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ======================= DATOS COMPLETOS =======================
+    const VERBS_DATA = [
+        { base: "FLY", past: "FLEW", participle: "FLOWN", spanish: "Volar" },
+        { base: "RUN", past: "RAN", participle: "RUN", spanish: "Correr" },
+        { base: "EAT", past: "ATE", participle: "EATEN", spanish: "Comer" },
+        { base: "SPEAK", past: "SPOKE", participle: "SPOKEN", spanish: "Hablar" },
+        { base: "BUY", past: "BOUGHT", participle: "BOUGHT", spanish: "Comprar" },
+        { base: "GO", past: "WENT", participle: "GONE", spanish: "Ir" },
+        { base: "LEAVE", past: "LEFT", participle: "LEFT", spanish: "Dejar / Salir" },
+        { base: "DRINK", past: "DRANK", participle: "DRUNK", spanish: "Beber" },
+        { base: "READ", past: "READ", participle: "READ", spanish: "Leer" },
+        { base: "BE", past: "WAS/WERE", participle: "BEEN", spanish: "Ser / Estar" },
+        { base: "DO", past: "DID", participle: "DONE", spanish: "Hacer" },
+        { base: "SEE", past: "SAW", participle: "SEEN", spanish: "Ver" },
+        { base: "SAY", past: "SAID", participle: "SAID", spanish: "Decir" },
+        { base: "DRIVE", past: "DROVE", participle: "DRIVEN", spanish: "Conducir" },
+        { base: "KNOW", past: "KNEW", participle: "KNOWN", spanish: "Saber / Conocer" },
+        { base: "RIDE", past: "RODE", participle: "RIDDEN", spanish: "Montar" },
+        { base: "BEAT", past: "BEAT", participle: "BEATEN", spanish: "Golpear / Vencer" },
+        { base: "BECOME", past: "BECAME", participle: "BECOME", spanish: "Convertirse en" },
+        { base: "BEGIN", past: "BEGAN", participle: "BEGUN", spanish: "Comenzar" },
+        { base: "GET", past: "GOT", participle: "GOTTEN", spanish: "Obtener / Conseguir" },
+        { base: "TAKE", past: "TOOK", participle: "TAKEN", spanish: "Tomar" },
+        { base: "MEET", past: "MET", participle: "MET", spanish: "Conocer / Encontrar" },
+        { base: "SWIM", past: "SWAM", participle: "SWUM", spanish: "Nadar" },
+        { base: "STAND", past: "STOOD", participle: "STOOD", spanish: "Estar de pie" },
+        { base: "SING", past: "SANG", participle: "SUNG", spanish: "Cantar" },
+        { base: "BUILD", past: "BUILT", participle: "BUILT", spanish: "Construir" },
+        { base: "CATCH", past: "CAUGHT", participle: "CAUGHT", spanish: "Atrapar" },
+        { base: "FIGHT", past: "FOUGHT", participle: "FOUGHT", spanish: "Pelear" },
+        { base: "WIN", past: "WON", participle: "WON", spanish: "Ganar" },
+        { base: "WRITE", past: "WROTE", participle: "WRITTEN", spanish: "Escribir" },
+        { base: "PAY", past: "PAID", participle: "PAID", spanish: "Pagar" },
+        { base: "TELL", past: "TOLD", participle: "TOLD", spanish: "Contar / Decir" },
+        { base: "THINK", past: "THOUGHT", participle: "THOUGHT", spanish: "Pensar" },
+        { base: "KEEP", past: "KEPT", participle: "KEPT", spanish: "Mantener / Guardar" },
+        { base: "FIND", past: "FOUND", participle: "FOUND", spanish: "Encontrar" },
+        { base: "HAVE", past: "HAD", participle: "HAD", spanish: "Tener" },
+        { base: "CHOOSE", past: "CHOSE", participle: "CHOSEN", spanish: "Elegir" },
+        { base: "BREAK", past: "BROKE", participle: "BROKEN", spanish: "Romper" },
+        { base: "BRING", past: "BROUGHT", participle: "BROUGHT", spanish: "Traer" },
+        { base: "FEEL", past: "FELT", participle: "FELT", spanish: "Sentir" },
+        { base: "BITE", past: "BIT", participle: "BITTEN", spanish: "Morder" },
+        { base: "CUT", past: "CUT", participle: "CUT", spanish: "Cortar" },
+        { base: "SWEEP", past: "SWEPT", participle: "SWEPT", spanish: "Barrer" },
+        { base: "FEED", past: "FED", participle: "FED", spanish: "Alimentar" },
+        { base: "THROW", past: "THREW", participle: "THROWN", spanish: "Lanzar" },
+        { base: "WEAR", past: "WORE", participle: "WORN", spanish: "Usar (ropa)" },
+        { base: "DRAW", past: "DREW", participle: "DRAWN", spanish: "Dibujar" },
+        { base: "COME", past: "CAME", participle: "COME", spanish: "Venir" },
+        { base: "LEARN", past: "LEARNED/LEARNT", participle: "LEARNED/LEARNT", spanish: "Aprender" },
+        { base: "LEND", past: "LENT", participle: "LENT", spanish: "Prestar" }
+    ];
+
+    // Modos disponibles
+    const MODE_KEY = {
+        base: 'base',
+        past: 'past',
+        participle: 'participle',
+        spanish: 'spanish'
+    };
+    let currentMode = MODE_KEY.base;
+
+    // Obtener el texto según modo y verbo
+    function getVerbTextByMode(verbData, mode) {
+        if (mode === MODE_KEY.base) return verbData.base;
+        if (mode === MODE_KEY.past) return verbData.past;
+        if (mode === MODE_KEY.participle) return verbData.participle;
+        if (mode === MODE_KEY.spanish) return verbData.spanish;
+        return verbData.base;
+    }
+
+    // Construir lista dinámica para el carrusel según el modo actual
+    function getCurrentVerbList() {
+        return VERBS_DATA.map(v => getVerbTextByMode(v, currentMode));
+    }
+
+    let currentVerbList = getCurrentVerbList();
+    const TOTAL_VERBS = currentVerbList.length;
+    const COPIES = 12;
+
+    // Elementos DOM
+    let verbListEl = document.getElementById('verbList');
+    let viewport = document.getElementById('viewport');
+    let spinBtn = document.getElementById('spinBtn');
+    let resultSpan = document.getElementById('resultWord');
+    let listBtn = document.getElementById('listBtn');
+    let modal = document.getElementById('verbModal');
+    let closeModal = document.querySelector('.close-modal');
+    let verbTableBody = document.getElementById('verbTableBody');
+    let filterBtns = document.querySelectorAll('.filter-btn');
+
+    let itemHeight = 150;
+    let currentVisualIndex = 0;
+    let spinning = false;
+    let animFrame = null;
+    const DURATION = 1600;
+
+    // Reconstruir la lista visual completa cuando cambia el modo
+    function rebuildList() {
+        verbListEl.innerHTML = '';
+        const newList = getCurrentVerbList();
+        for (let i = 0; i < COPIES; i++) {
+            newList.forEach(text => {
+                let div = document.createElement('div');
+                div.className = 'verb-item';
+                div.textContent = text;
+                div.style.height = `${itemHeight}px`;
+                div.style.lineHeight = `${itemHeight}px`;
+                verbListEl.appendChild(div);
+            });
+        }
+        verbListEl.style.height = `${verbListEl.children.length * itemHeight}px`;
+        // Recalcular posición para mantener el mismo índice lógico (mismo verbo en modo anterior)
+        // Pero como cambia el texto, buscamos el verbo base equivalente.
+        if (VERBS_DATA.length > 0) {
+            // Intentamos mantener la misma posición relativa (mismo índice en la lista original)
+            let originalIndex = currentVisualIndex % TOTAL_VERBS;
+            if (isNaN(originalIndex)) originalIndex = 0;
+            let targetCopy = Math.floor(COPIES / 2);
+            currentVisualIndex = (targetCopy * TOTAL_VERBS) + originalIndex;
+            setPosition(currentVisualIndex);
+            resultSpan.textContent = getCurrentVerbList()[originalIndex] || "—";
+        } else {
+            setPosition(0);
+        }
+    }
+
+    function setPosition(idx) {
+        verbListEl.style.transform = `translateY(-${idx * itemHeight}px)`;
+    }
+
+    function getVerbFromVisual(idx) {
+        let list = getCurrentVerbList();
+        let mod = Math.round(idx) % list.length;
+        if (mod < 0) mod += list.length;
+        return list[mod];
+    }
+
+    function normalizeIndex() {
+        let currentVerbText = getVerbFromVisual(currentVisualIndex);
+        const children = verbListEl.children;
+        const targetCopy = Math.floor(COPIES / 2);
+        let targetVisual = targetCopy * TOTAL_VERBS;
+        for (let i = 0; i < children.length; i++) {
+            if (children[i].textContent === currentVerbText) {
+                targetVisual = i;
+                break;
+            }
+        }
+        currentVisualIndex = targetVisual;
+        setPosition(currentVisualIndex);
+    }
+
+    function startSpin() {
+        if (spinning) return;
+        spinning = true;
+        spinBtn.disabled = true;
+        listBtn.disabled = true;
+
+        const verbList = getCurrentVerbList();
+        const total = verbList.length;
+        let startVisual = currentVisualIndex;
+        let finalVerbIndex = Math.floor(Math.random() * total);
+        let extraRevolutions = 6 + Math.floor(Math.random() * 4);
+        
+        let currentPosInCycle = startVisual % total;
+        let delta = (finalVerbIndex - currentPosInCycle);
+        if (delta <= 0) delta += total;
+        
+        let totalSteps = extraRevolutions * total + delta;
+        let targetVisual = startVisual + totalSteps;
+        let spinStart = performance.now();
+
+        function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+        function animate(now) {
+            let elapsed = now - spinStart;
+            let t = Math.min(1, elapsed / DURATION);
+            let eased = easeOutCubic(t);
+            currentVisualIndex = startVisual + (targetVisual - startVisual) * eased;
+            setPosition(currentVisualIndex);
+            resultSpan.textContent = getVerbFromVisual(currentVisualIndex);
+
+            if (t < 1) {
+                animFrame = requestAnimationFrame(animate);
+            } else {
+                currentVisualIndex = Math.round(targetVisual);
+                setPosition(currentVisualIndex);
+                normalizeIndex();
+                spinning = false;
+                spinBtn.disabled = false;
+                listBtn.disabled = false;
+                // Asegurar resultado final exacto
+                resultSpan.textContent = getVerbFromVisual(currentVisualIndex);
+            }
+        }
+        if (animFrame) cancelAnimationFrame(animFrame);
+        animFrame = requestAnimationFrame(animate);
+    }
+
+    // Llenar tabla modal (siempre todos los datos)
+    function populateVerbTable() {
+        verbTableBody.innerHTML = '';
+        VERBS_DATA.forEach(v => {
+            let row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${v.base}</strong></td>
+                <td>${v.past}</td>
+                <td>${v.participle}</td>
+                <td>${v.spanish}</td>
+            `;
+            verbTableBody.appendChild(row);
+        });
+    }
+
+    function openModal() {
+        populateVerbTable();
+        modal.style.display = 'block';
+    }
+
+    function closeModalFunc() {
+        modal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) closeModalFunc();
+    }
+
+    // Cambio de modo (filtro)
+    function setMode(mode) {
+        if (spinning) return;
+        currentMode = mode;
+        // Actualizar UI de botones
+        filterBtns.forEach(btn => {
+            if (btn.dataset.mode === mode) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        // Reconstruir lista con el nuevo modo
+        rebuildList();
+        // Actualizar resultado mostrado
+        resultSpan.textContent = getVerbFromVisual(currentVisualIndex);
+    }
+
+    // Inicialización responsiva y resize
+    function handleResize() {
+        if (spinning) return;
+        let newHeight = viewport.clientHeight;
+        if (newHeight !== itemHeight && newHeight > 0) {
+            itemHeight = newHeight;
+            rebuildList();
+        }
+    }
+
+    function init() {
+        itemHeight = viewport.clientHeight;
+        rebuildList();
+        let initialRandom = Math.floor(Math.random() * TOTAL_VERBS);
+        let targetCopy = Math.floor(COPIES / 2);
+        currentVisualIndex = (targetCopy * TOTAL_VERBS) + initialRandom;
+        setPosition(currentVisualIndex);
+        resultSpan.textContent = getVerbFromVisual(currentVisualIndex);
+        setTimeout(normalizeIndex, 50);
+
+        spinBtn.addEventListener('click', startSpin);
+        listBtn.addEventListener('click', openModal);
+        closeModal.addEventListener('click', closeModalFunc);
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!spinning) setMode(btn.dataset.mode);
+            });
+        });
+        window.addEventListener('resize', () => setTimeout(handleResize, 100));
+    }
+
+    init();
+</script>
+</body>
+</html>
