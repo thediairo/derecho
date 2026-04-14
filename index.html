@@ -125,6 +125,7 @@
             text-align: center;
         }
 
+        /* --- Estilo del botón principal 'Generar' --- */
         .generate-btn {
             background: linear-gradient(to right, #6a11cb, #2575fc);
             color: white;
@@ -152,6 +153,7 @@
             font-size: 3rem;
             margin-bottom: 15px;
         }
+    
 
         .question-display {
             margin-top: 40px;
@@ -164,7 +166,78 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 100%; 
         }
+
+       
+        .reveal-btn {
+            
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px; 
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(38, 117, 252, 0.4);
+            transition: transform 0.2s ease, opacity 0.3s ease;
+            margin-top: 20px;
+            
+          
+            opacity: 0;
+            pointer-events: none; 
+        }
+          .btn {
+            
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px; 
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(38, 117, 252, 0.4);
+            transition: transform 0.2s ease, opacity 0.3s ease;
+            margin-top: 20px;
+            
+          
+           
+        }
+
+        .reveal-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .reveal-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(38, 117, 252, 0.6);
+        }
+ 
+        .answer-display {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e9ecef; 
+            border-radius: 12px;
+            border-left: 5px solid #6a11cb; 
+            font-size: 1.1rem;
+            text-align: left;
+            width: 100%;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.5s ease, max-height 0.5s ease;
+            color: #555;
+        }
+
+        .answer-display.active {
+            opacity: 1;
+            max-height: 500px; 
+        }
+     
 
         footer {
             text-align: center;
@@ -196,6 +269,10 @@
             .question-display {
                 font-size: 1.1rem;
             }
+
+            .reveal-btn {
+                padding: 10px 20px;
+            }
         }
     </style>
 </head>
@@ -215,15 +292,6 @@
                 <select id="semester-select">
                     <option value="">Seleccionar semestre</option>
                     <option value="1">Semestre 1</option>
-                    <option value="2">Semestre 2</option>
-                    <option value="3">Semestre 3</option>
-                    <option value="4">Semestre 4</option>
-                    <option value="5">Semestre 5</option>
-                    <option value="6">Semestre 6</option>
-                    <option value="7">Semestre 7</option>
-                    <option value="8">Semestre 8</option>
-                    <option value="9">Semestre 9</option>
-                    <option value="10">Semestre 10</option>
                 </select>
             </div>
             
@@ -232,13 +300,13 @@
                 <select id="subject-select">
                     <option value="">Seleccionar materia</option>
                     <option value="romano">Derecho Romano</option>
-                    <option value="constitucional">Derecho Constitucional</option>
-                    <option value="penal">Derecho Penal</option>
-                    <option value="civil">Derecho Civil</option>
-                    <option value="mercantil">Derecho Mercantil</option>
-                    <option value="laboral">Derecho Laboral</option>
-                    <option value="administrativo">Derecho Administrativo</option>
-                    <option value="internacional">Derecho Internacional</option>
+                    <option value="humanos">Derechos Humanos</option>
+                    <option value="persona">Derechos de la persona</option>
+                    <option value="fundamentos">Fundamentos del derecho</option>
+                    <option value="teoria">Teoria del Estado</option>
+                    <option value="expresion">Expresión oral y escrita</option>
+                    <option value="identidad">Identidad y cultura</option>
+                    <option value="actividades">Actividades deportivas</option>
                 </select>
             </div>
             
@@ -263,10 +331,26 @@
                 <i class="fas fa-question"></i>
                 Generar Pregunta
             </button>
+           
             
             <div class="question-display">
-                <p>Selecciona tus preferencias y haz clic en el botón para generar una pregunta</p>
+                <p id="pregunta-texto">Selecciona tus preferencias y haz clic en el botón para generar una pregunta</p>
             </div>
+            
+            <button class="reveal-btn" id="revealBtn">
+                Revelar Respuesta
+                <i class="fas fa-eye"></i>
+            </button>
+
+            <div class="answer-display" id="answerDisplay">
+                <p id="respuesta-texto">La respuesta aparecerá aquí.</p>
+            </div>
+
+               <button class="btn" id="verbos">
+                Practica de verbos
+               
+            </button>
+
         </div>
         
         <footer>
@@ -280,31 +364,133 @@
             const menuToggle = document.getElementById('menuToggle');
             const menuContent = document.getElementById('menuContent');
             
-            // Alternar menú al hacer clic en el botón de configuración
+          
+            const revealBtn = document.getElementById('revealBtn');
+            const answerDisplay = document.getElementById('answerDisplay');
+            const preguntaTexto = document.getElementById('pregunta-texto'); 
+            const respuestaTexto = document.getElementById('respuesta-texto'); 
+            var resultado;
+            
+          
             menuToggle.addEventListener('click', function() {
                 menuContent.classList.toggle('active');
                 
-                // Rotar el icono al abrir/cerrar
                 if (menuContent.classList.contains('active')) {
                     menuToggle.innerHTML = '<i class="fas fa-times"></i>';
                 } else {
                     menuToggle.innerHTML = '<i class="fas fa-cog"></i>';
                 }
             });
+
             
-            // Aquí iría la lógica para generar preguntas en el futuro
+                document.getElementById("verbos").addEventListener("click", (event)=>{
+                  window.location.assign("verbos.html");
+                });
+             
+            
+            
             const generateBtn = document.querySelector('.generate-btn');
-            generateBtn.addEventListener('click', function() {
-                // Animación de clic
+            generateBtn.addEventListener('click',async function () {
+                
                 this.style.transform = 'scale(0.95)';
                 setTimeout(() => {
                     this.style.transform = 'scale(1.05)';
                 }, 100);
+
+               
+                revealBtn.classList.remove('active');
+                answerDisplay.classList.remove('active');
+                respuestaTexto.textContent = "La respuesta aparecerá aquí."; 
+
+                var materia=document.getElementById("subject-select").value;
+                console.log(materia);
+
+                if(materia=="humanos"){
+                    resultado= Math.floor(Math.random() * (38-33+1))+33;
+                }else
+                if(materia=="persona"){
+                    resultado= Math.floor(Math.random() * (32-1+1))+1;
+                }else
+                if(materia=="actividades"){
+                    resultado=Math.floor(Math.random() * (48-39+1))+39;
+                }
+
+
+
                 
-                // En una versión futura, aquí se generaría la pregunta
-                // Por ahora solo un mensaje de ejemplo
-                document.querySelector('.question-display p').textContent = 
-                    "Función de generación de preguntas en desarrollo...";
+                console.log(resultado);
+
+             
+                
+
+                try {
+                    const respuesta= await fetch("preguntas.html");
+                    if(!respuesta.ok){
+                        throw new Error(`Error de red: ${respuesta.status}`);
+                    }
+                    const htmlTexto = await respuesta.text();
+
+                    const parser = new DOMParser();
+                    const elementos = parser.parseFromString(htmlTexto, 'text/html');
+
+                  
+                    const preguntaElemento = elementos.querySelector(`[idp="${resultado}"]`);
+                   
+
+                    if(preguntaElemento){
+                        
+                        preguntaTexto.textContent = preguntaElemento.textContent; 
+                        revealBtn.classList.add('active');
+
+                    } else {
+                        preguntaTexto.textContent = "Error: No se encontró la pregunta con el ID " + resultado;
+                        answerDisplay.removeAttribute('data-answer');
+                    }
+
+
+                } catch (error) {
+                  console.error("Hubo un problema con la operación fetch:", error); 
+                  preguntaTexto.textContent = "Error al cargar el archivo de preguntas."; 
+                }
+            });
+
+        
+            revealBtn.addEventListener('click', async function() {
+                try {
+                     const respuesta= await fetch("preguntas.html");
+                    if(!respuesta.ok){
+                        throw new Error(`Error de red: ${respuesta.status}`);
+                    }
+                    const htmlTexto = await respuesta.text();
+
+                    const parser = new DOMParser();
+                    const elementos = parser.parseFromString(htmlTexto, 'text/html');
+
+                  
+                    const respuestaElemento = elementos.querySelector(`[idr="${resultado}"]`);
+                   
+
+                    if(respuestaElemento){
+                        
+                        respuestaTexto.textContent = respuestaElemento.textContent; 
+                        revealBtn.classList.add('active');
+
+                    } else {
+                        preguntaTexto.textContent = "Error: No se encontró la respuesta con el ID " + resultado;
+                        answerDisplay.removeAttribute('data-answer');
+                    }
+
+                    
+                } catch (error) {
+                     console.error("Hubo un problema con la operación fetch:", error); 
+                  preguntaTexto.textContent = "Error al cargar el archivo de respuestas."; 
+                }
+
+             
+                answerDisplay.classList.add('active');
+
+              
+                revealBtn.classList.remove('active');
             });
         });
     </script>
