@@ -318,6 +318,14 @@
         .verb-table tr:nth-child(even) {
             background-color: #f8f9fa;
         }
+        .verb-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .text-center {
+            text-align: center;
+        }
         @media (max-width: 650px) {
             .verb-table th, .verb-table td {
                 padding: 6px 5px;
@@ -362,7 +370,6 @@
         <p style="font-size: 0.9rem; opacity: 0.8;">Entrenamiento de Inglés Técnico</p>
     </header>
 
-    <!-- Panel de filtros -->
     <div class="filters">
         <button class="filter-btn active" data-mode="base"><i class="fas fa-font"></i> <span>Base</span></button>
         <button class="filter-btn" data-mode="past"><i class="fas fa-clock"></i> <span>Simple Past</span></button>
@@ -404,7 +411,6 @@
     </footer>
 </div>
 
-<!-- Modal para tabla completa -->
 <div id="verbModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -414,7 +420,13 @@
         <div class="table-wrapper">
             <table class="verb-table" id="verbTable">
                 <thead>
-                    <tr><th>Base Form</th><th>Simple Past</th><th>Past Participle</th><th>Español</th></tr>
+                    <tr>
+                        <th class="text-center" style="width: 50px;">Incluir</th>
+                        <th>Base Form</th>
+                        <th>Simple Past</th>
+                        <th>Past Participle</th>
+                        <th>Español</th>
+                    </tr>
                 </thead>
                 <tbody id="verbTableBody"></tbody>
             </table>
@@ -424,81 +436,123 @@
 
 <script>
     // ======================= DATOS COMPLETOS =======================
-  const VERBS_DATA = [
-    // --- Bloque Original (1-50) ---
-    { base: "FLY", past: "FLEW", participle: "FLOWN", spanish: "Volar" },
-    { base: "RUN", past: "RAN", participle: "RUN", spanish: "Correr" },
-    { base: "EAT", past: "ATE", participle: "EATEN", spanish: "Comer" },
-    { base: "SPEAK", past: "SPOKE", participle: "SPOKEN", spanish: "Hablar" },
-    { base: "BUY", past: "BOUGHT", participle: "BOUGHT", spanish: "Comprar" },
-    { base: "GO", past: "WENT", participle: "GONE", spanish: "Ir" },
-    { base: "LEAVE", past: "LEFT", participle: "LEFT", spanish: "Dejar / Salir" },
-    { base: "DRINK", past: "DRANK", participle: "DRUNK", spanish: "Beber" },
-    { base: "READ", past: "READ", participle: "READ", spanish: "Leer" },
-    { base: "BE", past: "WAS/WERE", participle: "BEEN", spanish: "Ser / Estar" },
-    { base: "DO", past: "DID", participle: "DONE", spanish: "Hacer" },
-    { base: "SEE", past: "SAW", participle: "SEEN", spanish: "Ver" },
-    { base: "SAY", past: "SAID", participle: "SAID", spanish: "Decir" },
-    { base: "DRIVE", past: "DROVE", participle: "DRIVEN", spanish: "Conducir" },
-    { base: "KNOW", past: "KNEW", participle: "KNOWN", spanish: "Saber / Conocer" },
-    { base: "RIDE", past: "RODE", participle: "RIDDEN", spanish: "Montar" },
-    { base: "BEAT", past: "BEAT", participle: "BEATEN", spanish: "Golpear / Vencer" },
-    { base: "BECOME", past: "BECAME", participle: "BECOME", spanish: "Convertirse en" },
-    { base: "BEGIN", past: "BEGAN", participle: "BEGUN", spanish: "Comenzar" },
-    { base: "GET", past: "GOT", participle: "GOTTEN", spanish: "Obtener / Conseguir" },
-    { base: "TAKE", past: "TOOK", participle: "TAKEN", spanish: "Tomar" },
-    { base: "MEET", past: "MET", participle: "MET", spanish: "Conocer / Encontrar" },
-    { base: "SWIM", past: "SWAM", participle: "SWUM", spanish: "Nadar" },
-    { base: "STAND", past: "STOOD", participle: "STOOD", spanish: "Estar de pie" },
-    { base: "SING", past: "SANG", participle: "SUNG", spanish: "Cantar" },
-    { base: "BUILD", past: "BUILT", participle: "BUILT", spanish: "Construir" },
-    { base: "CATCH", past: "CAUGHT", participle: "CAUGHT", spanish: "Atrapar" },
-    { base: "FIGHT", past: "FOUGHT", participle: "FOUGHT", spanish: "Pelear" },
-    { base: "WIN", past: "WON", participle: "WON", spanish: "Ganar" },
-    { base: "WRITE", past: "WROTE", participle: "WRITTEN", spanish: "Escribir" },
-    { base: "PAY", past: "PAID", participle: "PAID", spanish: "Pagar" },
-    { base: "TELL", past: "TOLD", participle: "TOLD", spanish: "Contar / Decir" },
-    { base: "THINK", past: "THOUGHT", participle: "THOUGHT", spanish: "Pensar" },
-    { base: "KEEP", past: "KEPT", participle: "KEPT", spanish: "Mantener / Guardar" },
-    { base: "FIND", past: "FOUND", participle: "FOUND", spanish: "Encontrar" },
-    { base: "HAVE", past: "HAD", participle: "HAD", spanish: "Tener" },
-    { base: "CHOOSE", past: "CHOSE", participle: "CHOSEN", spanish: "Elegir" },
-    { base: "BREAK", past: "BROKE", participle: "BROKEN", spanish: "Romper" },
-    { base: "BRING", past: "BROUGHT", participle: "BROUGHT", spanish: "Traer" },
-    { base: "FEEL", past: "FELT", participle: "FELT", spanish: "Sentir" },
-    { base: "BITE", past: "BIT", participle: "BITTEN", spanish: "Morder" },
-    { base: "CUT", past: "CUT", participle: "CUT", spanish: "Cortar" },
-    { base: "SWEEP", past: "SWEPT", participle: "SWEPT", spanish: "Barrer" },
-    { base: "FEED", past: "FED", participle: "FED", spanish: "Alimentar" },
-    { base: "THROW", past: "THREW", participle: "THROWN", spanish: "Lanzar" },
-    { base: "WEAR", past: "WORE", participle: "WORN", spanish: "Usar (ropa)" },
-    { base: "DRAW", past: "DREW", participle: "DRAWN", spanish: "Dibujar" },
-    { base: "COME", past: "CAME", participle: "COME", spanish: "Venir" },
-    { base: "LEARN", past: "LEARNED/LEARNT", participle: "LEARNED/LEARNT", spanish: "Aprender" },
-    { base: "LEND", past: "LENT", participle: "LENT", spanish: "Prestar" },
+    const VERBS_DATA = [
+        // --- Bloque Original (1-50) ---
+        { base: "FLY", past: "FLEW", participle: "FLOWN", spanish: "Volar" },
+        { base: "RUN", past: "RAN", participle: "RUN", spanish: "Correr" },
+        { base: "EAT", past: "ATE", participle: "EATEN", spanish: "Comer" },
+        { base: "SPEAK", past: "SPOKE", participle: "SPOKEN", spanish: "Hablar" },
+        { base: "BUY", past: "BOUGHT", participle: "BOUGHT", spanish: "Comprar" },
+        { base: "GO", past: "WENT", participle: "GONE", spanish: "Ir" },
+        { base: "LEAVE", past: "LEFT", participle: "LEFT", spanish: "Dejar / Salir" },
+        { base: "DRINK", past: "DRANK", participle: "DRUNK", spanish: "Beber" },
+        { base: "READ", past: "READ", participle: "READ", spanish: "Leer" },
+        { base: "BE", past: "WAS/WERE", participle: "BEEN", spanish: "Ser / Estar" },
+        { base: "DO", past: "DID", participle: "DONE", spanish: "Hacer" },
+        { base: "SEE", past: "SAW", participle: "SEEN", spanish: "Ver" },
+        { base: "SAY", past: "SAID", participle: "SAID", spanish: "Decir" },
+        { base: "DRIVE", past: "DROVE", participle: "DRIVEN", spanish: "Conducir" },
+        { base: "KNOW", past: "KNEW", participle: "KNOWN", spanish: "Saber / Conocer" },
+        { base: "RIDE", past: "RODE", participle: "RIDDEN", spanish: "Montar" },
+        { base: "BEAT", past: "BEAT", participle: "BEATEN", spanish: "Golpear / Vencer" },
+        { base: "BECOME", past: "BECAME", participle: "BECOME", spanish: "Convertirse en" },
+        { base: "BEGIN", past: "BEGAN", participle: "BEGUN", spanish: "Comenzar" },
+        { base: "GET", past: "GOT", participle: "GOTTEN", spanish: "Obtener / Conseguir" },
+        { base: "TAKE", past: "TOOK", participle: "TAKEN", spanish: "Tomar" },
+        { base: "MEET", past: "MET", participle: "MET", spanish: "Conocer / Encontrar" },
+        { base: "SWIM", past: "SWAM", participle: "SWUM", spanish: "Nadar" },
+        { base: "STAND", past: "STOOD", participle: "STOOD", spanish: "Estar de pie" },
+        { base: "SING", past: "SANG", participle: "SUNG", spanish: "Cantar" },
+        { base: "BUILD", past: "BUILT", participle: "BUILT", spanish: "Construir" },
+        { base: "CATCH", past: "CAUGHT", participle: "CAUGHT", spanish: "Atrapar" },
+        { base: "FIGHT", past: "FOUGHT", participle: "FOUGHT", spanish: "Pelear" },
+        { base: "WIN", past: "WON", participle: "WON", spanish: "Ganar" },
+        { base: "WRITE", past: "WROTE", participle: "WRITTEN", spanish: "Escribir" },
+        { base: "PAY", past: "PAID", participle: "PAID", spanish: "Pagar" },
+        { base: "TELL", past: "TOLD", participle: "TOLD", spanish: "Contar / Decir" },
+        { base: "THINK", past: "THOUGHT", participle: "THOUGHT", spanish: "Pensar" },
+        { base: "KEEP", past: "KEPT", participle: "KEPT", spanish: "Mantener / Guardar" },
+        { base: "FIND", past: "FOUND", participle: "FOUND", spanish: "Encontrar" },
+        { base: "HAVE", past: "HAD", participle: "HAD", spanish: "Tener" },
+        { base: "CHOOSE", past: "CHOSE", participle: "CHOSEN", spanish: "Elegir" },
+        { base: "BREAK", past: "BROKE", participle: "BROKEN", spanish: "Romper" },
+        { base: "BRING", past: "BROUGHT", participle: "BROUGHT", spanish: "Traer" },
+        { base: "FEEL", past: "FELT", participle: "FELT", spanish: "Sentir" },
+        { base: "BITE", past: "BIT", participle: "BITTEN", spanish: "Morder" },
+        { base: "CUT", past: "CUT", participle: "CUT", spanish: "Cortar" },
+        { base: "SWEEP", past: "SWEPT", participle: "SWEPT", spanish: "Barrer" },
+        { base: "FEED", past: "FED", participle: "FED", spanish: "Alimentar" },
+        { base: "THROW", past: "THREW", participle: "THROWN", spanish: "Lanzar" },
+        { base: "WEAR", past: "WORE", participle: "WORN", spanish: "Usar (ropa)" },
+        { base: "DRAW", past: "DREW", participle: "DRAWN", spanish: "Dibujar" },
+        { base: "COME", past: "CAME", participle: "COME", spanish: "Venir" },
+        { base: "LEARN", past: "LEARNED/LEARNT", participle: "LEARNED/LEARNT", spanish: "Aprender" },
+        { base: "LEND", past: "LENT", participle: "LENT", spanish: "Prestar" },
 
-    // --- Bloque de Imágenes (61-80) ---
-    { base: "STEAL", past: "STOLE", participle: "STOLEN", spanish: "Robar" },
-    { base: "BEND", past: "BENT", participle: "BENT", spanish: "Doblar" },
-    { base: "GIVE", past: "GAVE", participle: "GIVEN", spanish: "Dar" },
-    { base: "HANG", past: "HUNG", participle: "HUNG", spanish: "Colgar" },
-    { base: "HEAR", past: "HEARD", participle: "HEARD", spanish: "Escuchar" },
-    { base: "HIDE", past: "HID", participle: "HIDDEN", spanish: "Esconder" },
-    { base: "HIT", past: "HIT", participle: "HIT", spanish: "Golpear" },
-    { base: "HURT", past: "HURT", participle: "HURT", spanish: "Lastimar / Herir" },
-    { base: "FORGET", past: "FORGOT", participle: "FORGOTTEN", spanish: "Olvidar" },
-    { base: "SLEEP", past: "SLEPT", participle: "SLEPT", spanish: "Dormir" },
-    { base: "SEND", past: "SENT", participle: "SENT", spanish: "Enviar" },
-    { base: "SHAKE", past: "SHOOK", participle: "SHAKEN", spanish: "Agitar" },
-    { base: "DREAM", past: "DREAMT/DREAMED", participle: "DREAMT/DREAMED", spanish: "Soñar" },
-    { base: "HOLD", past: "HELD", participle: "HELD", spanish: "Sostener" },
-    { base: "BET", past: "BET", participle: "BET", spanish: "Apostar" },
-    { base: "UNDERSTAND", past: "UNDERSTOOD", participle: "UNDERSTOOD", spanish: "Entender" },
-    { base: "PUT", past: "PUT", participle: "PUT", spanish: "Poner" },
-    { base: "DEAL", past: "DEALT", participle: "DEALT", spanish: "Tratar" },
-    { base: "SOW", past: "SOWED", participle: "SOWN/SOWED", spanish: "Sembrar" },
-    { base: "SWEAR", past: "SWORE", participle: "SWORN", spanish: "Jurar" }
-];
+        // --- Bloque de Imágenes (61-80) ---
+        { base: "STEAL", past: "STOLE", participle: "STOLEN", spanish: "Robar" },
+        { base: "BEND", past: "BENT", participle: "BENT", spanish: "Doblar" },
+        { base: "GIVE", past: "GAVE", participle: "GIVEN", spanish: "Dar" },
+        { base: "HANG", past: "HUNG", participle: "HUNG", spanish: "Colgar" },
+        { base: "HEAR", past: "HEARD", participle: "HEARD", spanish: "Escuchar" },
+        { base: "HIDE", past: "HID", participle: "HIDDEN", spanish: "Esconder" },
+        { base: "HIT", past: "HIT", participle: "HIT", spanish: "Golpear" },
+        { base: "HURT", past: "HURT", participle: "HURT", spanish: "Lastimar / Herir" },
+        { base: "FORGET", past: "FORGOT", participle: "FORGOTTEN", spanish: "Olvidar" },
+        { base: "SLEEP", past: "SLEPT", participle: "SLEPT", spanish: "Dormir" },
+        { base: "SEND", past: "SENT", participle: "SENT", spanish: "Enviar" },
+        { base: "SHAKE", past: "SHOOK", participle: "SHAKEN", spanish: "Agitar" },
+        { base: "DREAM", past: "DREAMT/DREAMED", participle: "DREAMT/DREAMED", spanish: "Soñar" },
+        { base: "HOLD", past: "HELD", participle: "HELD", spanish: "Sostener" },
+        { base: "BET", past: "BET", participle: "BET", spanish: "Apostar" },
+        { base: "UNDERSTAND", past: "UNDERSTOOD", participle: "UNDERSTOOD", spanish: "Entender" },
+        { base: "PUT", past: "PUT", participle: "PUT", spanish: "Poner" },
+        { base: "DEAL", past: "DEALT", participle: "DEALT", spanish: "Tratar" },
+        { base: "SOW", past: "SOWED", participle: "SOWN/SOWED", spanish: "Sembrar" },
+        { base: "SWEAR", past: "SWORE", participle: "SWORN", spanish: "Jurar" },
+
+        // --- Bloque de Nuevas Imágenes (81-120) ---
+        { base: "SEW", past: "SEWED", participle: "SEWN/SEWED", spanish: "Coser" },
+        { base: "MEAN", past: "MEANT", participle: "MEANT", spanish: "Significar / Querer decir" },
+        { base: "RISE", past: "ROSE", participle: "RISEN", spanish: "Ascender / Subir" },
+        { base: "SHOW", past: "SHOWED", participle: "SHOWN/SHOWED", spanish: "Mostrar" },
+        { base: "SMELL", past: "SMELT/SMELLED", participle: "SMELT/SMELLED", spanish: "Oler" },
+        { base: "SPILL", past: "SPILT/SPILLED", participle: "SPILT/SPILLED", spanish: "Derramar" },
+        { base: "SPREAD", past: "SPREAD", participle: "SPREAD", spanish: "Extender / Esparcir" },
+        { base: "BLEED", past: "BLED", participle: "BLED", spanish: "Sangrar" },
+        { base: "BLOW", past: "BLEW", participle: "BLOWN", spanish: "Soplar" },
+        { base: "DIG", past: "DUG", participle: "DUG", spanish: "Cavar" },
+        { base: "SPILL", past: "SPILT/SPILLED", participle: "SPILT/SPILLED", spanish: "Derramar" },
+        { base: "OWE", past: "OWED", participle: "OWED", spanish: "Deber" },
+        { base: "LEAD", past: "LED", participle: "LED", spanish: "Guiar / Conducir" },
+        { base: "KNEEL", past: "KNELT/KNEELED", participle: "KNELT/KNEELED", spanish: "Arrodillarse" },
+        { base: "DIVE", past: "DIVED/DOVE", participle: "DIVED", spanish: "Bucear / Clavarse" },
+        { base: "SIT", past: "SAT", participle: "SAT", spanish: "Sentarse" },
+        { base: "BEFALL", past: "BEFELL", participle: "BEFALLEN", spanish: "Suceder / Ocurrir" },
+        { base: "BESET", past: "BESET", participle: "BESET", spanish: "Acosar / Cercar" },
+        { base: "FREEZE", past: "FROZE", participle: "FROZEN", spanish: "Congelar" },
+        { base: "THRUST", past: "THRUST", participle: "THRUST", spanish: "Empujar / Clavar" },
+        { base: "GRIND", past: "GROUND", participle: "GROUND", spanish: "Moler" },
+        { base: "FORBID", past: "FORBADE", participle: "FORBIDDEN", spanish: "Prohibir" },
+        { base: "BURN", past: "BURNT/BURNED", participle: "BURNT/BURNED", spanish: "Arder / Quemar" },
+        { base: "BURST", past: "BURST", participle: "BURST", spanish: "Reventar / Explotar" },
+        { base: "BIDE", past: "BODE/BIDED", participle: "BIDED", spanish: "Aguantar / Esperar" },
+        { base: "FLEE", past: "FLED", participle: "FLED", spanish: "Huir" },
+        { base: "SEEK", past: "SOUGHT", participle: "SOUGHT", spanish: "Buscar" },
+        { base: "TEAR", past: "TORE", participle: "TORN", spanish: "Rasgar / Romper" },
+        { base: "LIE", past: "LAY", participle: "LAIN", spanish: "Mentir / Recostarse" },
+        { base: "STRIKE", past: "STRUCK", participle: "STRUCK/STRICKEN", spanish: "Golpear / Chocar" },
+        { base: "SPLIT", past: "SPLIT", participle: "SPLIT", spanish: "Dividir" },
+        { base: "CAST", past: "CAST", participle: "CAST", spanish: "Moldear / Lanzar" },
+        { base: "FLING", past: "FLUNG", participle: "FLUNG", spanish: "Arrastrar / Lanzar" },
+        { base: "LIGHT", past: "LIT/LIGHTED", participle: "LIT/LIGHTED", spanish: "Iluminar / Encender" },
+        { base: "SHRINK", past: "SHRANK/SHRUNK", participle: "SHRUNK", spanish: "Encoger" },
+        { base: "TEACH", past: "TAUGHT", participle: "TAUGHT", spanish: "Enseñar" },
+        { base: "SWING", past: "SWUNG", participle: "SWUNG", spanish: "Columpiarse" },
+        { base: "SPIT", past: "SPIT/SPAT", participle: "SPIT/SPAT", spanish: "Escupir" },
+        { base: "WIND", past: "WOUND", participle: "WOUND", spanish: "Enrollar" },
+        { base: "SINK", past: "SANK", participle: "SUNK", spanish: "Hundir" }
+    ];
 
     // Modos disponibles
     const MODE_KEY = {
@@ -509,6 +563,9 @@
     };
     let currentMode = MODE_KEY.base;
 
+    // Set global para guardar los índices de los verbos seleccionados
+    let selectedIndices = new Set();
+
     // Obtener el texto según modo y verbo
     function getVerbTextByMode(verbData, mode) {
         if (mode === MODE_KEY.base) return verbData.base;
@@ -518,13 +575,20 @@
         return verbData.base;
     }
 
-    // Construir lista dinámica para el carrusel según el modo actual
-    function getCurrentVerbList() {
-        return VERBS_DATA.map(v => getVerbTextByMode(v, currentMode));
+    // Filtrar los datos en base a la selección por checkbox
+    function getFilteredVerbsData() {
+        if (selectedIndices.size === 0) {
+            return VERBS_DATA;
+        }
+        return VERBS_DATA.filter((_, index) => selectedIndices.has(index));
     }
 
-    let currentVerbList = getCurrentVerbList();
-    const TOTAL_VERBS = currentVerbList.length;
+    // Construir lista dinámica para el carrusel según el modo y los filtros actuales
+    function getCurrentVerbList() {
+        const dataToUse = getFilteredVerbsData();
+        return dataToUse.map(v => getVerbTextByMode(v, currentMode));
+    }
+
     const COPIES = 12;
 
     // Elementos DOM
@@ -544,10 +608,12 @@
     let animFrame = null;
     const DURATION = 1600;
 
-    // Reconstruir la lista visual completa cuando cambia el modo
+    // Reconstruir la lista visual completa cuando cambia el modo o los filtros
     function rebuildList() {
         verbListEl.innerHTML = '';
         const newList = getCurrentVerbList();
+        const TOTAL_VERBS = newList.length;
+
         for (let i = 0; i < COPIES; i++) {
             newList.forEach(text => {
                 let div = document.createElement('div');
@@ -559,18 +625,17 @@
             });
         }
         verbListEl.style.height = `${verbListEl.children.length * itemHeight}px`;
-        // Recalcular posición para mantener el mismo índice lógico (mismo verbo en modo anterior)
-        // Pero como cambia el texto, buscamos el verbo base equivalente.
-        if (VERBS_DATA.length > 0) {
-            // Intentamos mantener la misma posición relativa (mismo índice en la lista original)
+        
+        if (TOTAL_VERBS > 0) {
             let originalIndex = currentVisualIndex % TOTAL_VERBS;
             if (isNaN(originalIndex)) originalIndex = 0;
             let targetCopy = Math.floor(COPIES / 2);
             currentVisualIndex = (targetCopy * TOTAL_VERBS) + originalIndex;
             setPosition(currentVisualIndex);
-            resultSpan.textContent = getCurrentVerbList()[originalIndex] || "—";
+            resultSpan.textContent = newList[originalIndex] || "—";
         } else {
             setPosition(0);
+            resultSpan.textContent = "—";
         }
     }
 
@@ -580,16 +645,21 @@
 
     function getVerbFromVisual(idx) {
         let list = getCurrentVerbList();
+        if (list.length === 0) return "—";
         let mod = Math.round(idx) % list.length;
         if (mod < 0) mod += list.length;
         return list[mod];
     }
 
     function normalizeIndex() {
+        const TOTAL_VERBS = getCurrentVerbList().length;
+        if (TOTAL_VERBS === 0) return;
+
         let currentVerbText = getVerbFromVisual(currentVisualIndex);
         const children = verbListEl.children;
         const targetCopy = Math.floor(COPIES / 2);
         let targetVisual = targetCopy * TOTAL_VERBS;
+        
         for (let i = 0; i < children.length; i++) {
             if (children[i].textContent === currentVerbText) {
                 targetVisual = i;
@@ -602,12 +672,19 @@
 
     function startSpin() {
         if (spinning) return;
+        
+        const verbList = getCurrentVerbList();
+        const total = verbList.length;
+
+        if (total === 0) {
+            alert("No hay verbos disponibles para girar.");
+            return;
+        }
+
         spinning = true;
         spinBtn.disabled = true;
         listBtn.disabled = true;
 
-        const verbList = getCurrentVerbList();
-        const total = verbList.length;
         let startVisual = currentVisualIndex;
         let finalVerbIndex = Math.floor(Math.random() * total);
         let extraRevolutions = 6 + Math.floor(Math.random() * 4);
@@ -639,7 +716,6 @@
                 spinning = false;
                 spinBtn.disabled = false;
                 listBtn.disabled = false;
-                // Asegurar resultado final exacto
                 resultSpan.textContent = getVerbFromVisual(currentVisualIndex);
             }
         }
@@ -647,18 +723,48 @@
         animFrame = requestAnimationFrame(animate);
     }
 
-    // Llenar tabla modal (siempre todos los datos)
+    // Llenar tabla usando métodos seguros del DOM para que el evento permanezca activo
     function populateVerbTable() {
         verbTableBody.innerHTML = '';
-        VERBS_DATA.forEach(v => {
-            let row = document.createElement('tr');
-            row.innerHTML = `
-                <td><strong>${v.base}</strong></td>
-                <td>${v.past}</td>
-                <td>${v.participle}</td>
-                <td>${v.spanish}</td>
-            `;
-            verbTableBody.appendChild(row);
+        VERBS_DATA.forEach((v, index) => {
+            let row = verbTableBody.insertRow();
+            
+            // Celda 0: Checkbox
+            let checkTd = row.insertCell(0);
+            checkTd.className = 'text-center';
+            
+            let checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'verb-checkbox';
+            checkbox.checked = selectedIndices.has(index);
+            
+            // Vinculamos de forma segura el evento al set
+            checkbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    selectedIndices.add(index);
+                } else {
+                    selectedIndices.delete(index);
+                }
+                // Actualiza la ruleta en el fondo automáticamente
+                rebuildList();
+            });
+            checkTd.appendChild(checkbox);
+
+            // Celda 1: Base Form
+            let baseTd = row.insertCell(1);
+            baseTd.innerHTML = `<strong>${v.base}</strong>`;
+
+            // Celda 2: Simple Past
+            let pastTd = row.insertCell(2);
+            pastTd.textContent = v.past;
+
+            // Celda 3: Past Participle
+            let partTd = row.insertCell(3);
+            partTd.textContent = v.participle;
+
+            // Celda 4: Español
+            let espTd = row.insertCell(4);
+            espTd.textContent = v.spanish;
         });
     }
 
@@ -667,8 +773,10 @@
         modal.style.display = 'block';
     }
 
+    // Al cerrar el modal, normalizamos la vista para evitar desfases visuales en el viewport
     function closeModalFunc() {
         modal.style.display = 'none';
+        normalizeIndex();
     }
 
     window.onclick = function(event) {
@@ -679,14 +787,11 @@
     function setMode(mode) {
         if (spinning) return;
         currentMode = mode;
-        // Actualizar UI de botones
         filterBtns.forEach(btn => {
             if (btn.dataset.mode === mode) btn.classList.add('active');
             else btn.classList.remove('active');
         });
-        // Reconstruir lista con el nuevo modo
         rebuildList();
-        // Actualizar resultado mostrado
         resultSpan.textContent = getVerbFromVisual(currentVisualIndex);
     }
 
@@ -703,6 +808,8 @@
     function init() {
         itemHeight = viewport.clientHeight;
         rebuildList();
+        
+        const TOTAL_VERBS = getCurrentVerbList().length;
         let initialRandom = Math.floor(Math.random() * TOTAL_VERBS);
         let targetCopy = Math.floor(COPIES / 2);
         currentVisualIndex = (targetCopy * TOTAL_VERBS) + initialRandom;
